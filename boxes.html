@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title></title>
+	</head>
+	<body>
+		<div id='box1' class='box draggable'></div>
+		<div id='box2' class='box draggable'></div>
+		<div id='box3' class='box draggable'></div>
+	</body>
+
+	<script type='text/javascript'>
+		/* Look into following to maybe replace events?
+		 * https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drag_event
+		 */
+		const clickables = document.querySelectorAll('.draggable');
+
+		let grabOffset;
+		let selected = null;
+
+		function handleStart(event) {
+			if (event.type === 'touchstart') {
+				event.preventDefault();
+			}
+
+			selected = event.target;
+
+			let x, y;
+			switch (event.type) {
+				case 'mousedown':
+					x = selected.offsetLeft - event.clientX;
+					y = selected.offsetTop - event.clientY;
+					break;
+
+				case 'touchstart':
+					x = selected.offsetLeft - event.targetTouches[0].clientX;
+					y = selected.offsetTop - event.targetTouches[0].clientY;
+					break;
+
+				default:
+					return;
+			}
+
+			grabOffset = { x: x, y: y };
+		}
+
+		function handleStop(event) {
+			if (event.type === 'touchstart') {
+				event.preventDefault();
+			}
+
+			selected.classList.remove('bigger');
+			selected = null;
+		}
+
+		function handleMove(event) {
+			if (selected) {
+				event.preventDefault();
+
+				const parentRef = selected.offsetParent;
+				const parent = {
+					width: parentRef.offsetWidth - selected.offsetWidth,
+					height: parentRef.offsetHeight - selected.offsetHeight,
+				};
+
+				let x, y;
+				switch (event.type) {
+					case 'mousemove':
+						x = grabOffset.x + event.clientX;
+						y = grabOffset.y + event.clientY;
+						break;
+
+					case 'touchmove':
+						x = grabOffset.x + event.targetTouches[0].clientX;
+						y = grabOffset.y + event.targetTouches[0].clientY;
+						break;
+
+					default:
+						return;
+				}
+
+				selected.classList.add('bigger');
+				selected.style.top = `${y}px`;
+				selected.style.left = `${x}px`;
+
+				// Get offset to parent element if selected is outside
+				let parentOffset = {
+					x: 0,
+					y: 0
+				};
+
+				if (selected.offsetLeft < 0) {
+					parentOffset.x = selected.offsetLeft;
+				} else if (selected.offsetLeft > parent.width) {
+					parentOffset.x = parent.width - selected.offsetLeft;
+				}
+
+				if (selected.offsetTop < 0) {
+					parentOffset.y = selected.offsetTop;
+				} else if (selected.offsetTop > parent.height) {
+					parentOffset.y = parent.height - selected.offsetTop;
+				}
+			}
+		}
+
+		clickables.forEach(target => {
+			target.addEventListener('mousedown', e => handleStart(e));
+			target.addEventListener('touchstart', e => handleStart(e));
+
+			target.addEventListener('mouseup', e => handleStop(e));
+			target.addEventListener('touchend', e => handleStop(e));
+		});
+
+		document.addEventListener('mousemove', e => handleMove(e));
+		document.addEventListener('touchmove', e => handleMove(e));
+	</script>
+</html>
+
+<style type='text/css'>
+:root {
+	--shadow-color: #111111bb;
+}
+
+html {
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+*, ::after, ::before {
+	box-sizing: inherit;
+}
+
+html, body {
+	height: 100vh;
+	width: 100vw;
+	margin: 0px;
+}
+
+#box1 {
+	background-color: #174950;
+	top: 10%;
+	left: 20px;
+}
+
+#box2 {
+	background-color: #8b0f32;
+	top: 40%;
+	left: 20px;
+}
+
+#box3 {
+	background-color: #ffcc00;
+	top: 70%;
+	left: 20px;
+}
+
+.box {
+	width: max(80px, 10vh);
+	height: max(80px, 10vh);
+}
+
+.draggable {
+	cursor: grab;
+	position: absolute;
+	box-shadow: -10px 10px 20px var(--shadow-color);
+}
+
+.draggable:active {
+	cursor: grabbing;
+	transform: scale(0.7);
+	box-shadow: -5px 5px 10px var(--shadow-color);
+	overflow: hidden !important;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bigger {
+	transform: scale(1.3) !important;
+	box-shadow: -20px 20px 30px var(--shadow-color) !important;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+</style>
