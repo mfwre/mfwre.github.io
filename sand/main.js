@@ -122,7 +122,6 @@ function setup() {
             element.setAttribute("y", i);
 
             element.addEventListener("mouseenter", e => spawn_box(e));
-            element.addEventListener("touchmove", e => spawn_box(e));
 
             container.append(element);
         }
