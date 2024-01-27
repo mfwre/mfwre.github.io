@@ -1,0 +1,21 @@
+#container {
+    width: calc(50 * 15px);
+    margin: auto;
+
+    display: grid;
+    grid-template-columns: repeat(50, 15px);
+    grid-template-rows: repeat(50, 15px);
+}
+
+.cell {
+    border-right: 1px dotted black;
+    border-bottom: 1px dotted black;
+}
+
+.c0 {
+    border-left: 1px dotted black;
+}
+
+.r0 {
+    border-top: 1px dotted black;
+}
