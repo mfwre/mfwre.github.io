@@ -25,7 +25,6 @@ class Field {
             }
         }
 
-        box.y_limit = this.columns[box.start_y];
         this.columns[box.start_y] -= 1;
         box.fill();
     }
@@ -51,7 +50,7 @@ class Box {
         this.ticks = 0;
         this.y_limit = N_BOXES - 1;
         this.arrived = false;
-        this.id = Math.random().toString(16).slice(2);
+        /* this.id = Math.random().toString(16).slice(2); */
     }
 
     get y() {
