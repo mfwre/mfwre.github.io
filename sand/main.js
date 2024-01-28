@@ -4,38 +4,30 @@ class Field {
         this.boxes = [];
         this.field = Array(n_cells);
         for (const i of Array(n_cells).keys()) {
-            this.field[i] = Array(n_cells).fill(null);
+            this.field[i] = new Array();
         }
     }
 
     add_box(box) {
         let column = this.field[box.start_x];
-        if (column[box.start_y] == null) {
-            column[box.start_y] = box;
-            this.boxes.push(box);
-        } else {
-            return;
+
+        let boxes_ahead = column.filter(item => item.y > box.start_y);
+        boxes_ahead.sort((a, b) => a.y >= b.y);
+
+
+        if (boxes_ahead.length > 0) {
+            box.y_limit = boxes_ahead[0].y_limit - 1;
         }
 
-        for (let col_index of Array(N_BOXES - box.start_y).keys()) {
-            let next_box = column[1 + col_index + box.start_y];
-            if (next_box) {
-                box.y_limit = next_box.y_limit - 1;
-                break;
-            }
-        }
+        column.push(box);
+        this.boxes.push(box);
 
-        this.columns[box.start_y] -= 1;
         box.fill();
     }
 
     update() {
         this.boxes.forEach(box => {
-            let column = this.field[box.start_x];
-            column[box.y] = null;
             box.move();
-            column[box.y] = box;
-
             if (box.arrived) {
                 this.boxes.splice(this.boxes.indexOf(box), 1);
             }
@@ -102,29 +94,41 @@ const COLORS = {
     4: "#78E6F2",
 };
 
-function spawn_box(event) {
-    let x = parseInt(event.target.getAttribute("x"));
-    let y = parseInt(event.target.getAttribute("y"));
-
+function spawn_box(x, y) {
     let box = new Box(x, y, new Date() - LOAD_TIME);
     FIELD.add_box(box);
 }
 
 function setup() {
     let container = document.getElementById("container");
-    for (let i of Array(N_BOXES).keys()) {
-        for (let j of Array(N_BOXES).keys()) {
+    for (let y of Array(N_BOXES).keys()) {
+        for (let x of Array(N_BOXES).keys()) {
             let element = document.createElement("div");
-            element.setAttribute("id", `c${j}r${i}`);
-            element.setAttribute("class", `cell r${i} c${j}`);
-            element.setAttribute("x", j);
-            element.setAttribute("y", i);
+            element.setAttribute("id", `c${x}r${y}`);
+            element.setAttribute("class", `cell r${y} c${x}`);
+            element.setAttribute("x", x);
+            element.setAttribute("y", y);
 
-            element.addEventListener("mouseenter", e => spawn_box(e));
+            element.addEventListener("mouseenter", () => spawn_box(x, y));
 
             container.append(element);
         }
     }
+
+    let rect = container.getBoundingClientRect();
+    container.addEventListener("touchmove", event => {
+        event.preventDefault();
+
+        // touches: https://developer.mozilla.org/en-US/docs/Web/API/TouchList
+        // scrollX === pageXOffset (deprecated)
+        let offset_x = (event.touches[0].clientX - window.scrollX - rect.left);
+        let offset_y = (event.touches[0].clientY - window.scrollY - rect.top);
+
+        let x = Math.floor(offset_x / 15);
+        let y = Math.floor(offset_y / 15);
+
+        spawn_box(x, y);
+    })
 }
 
 window.onload = setup;
