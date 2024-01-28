@@ -11,6 +11,10 @@ class Field {
     add_box(box) {
         let column = this.field[box.start_x];
 
+        if (box.current_node_color !== '') {
+            return;
+        }
+
         let boxes_ahead = column.filter(item => item.y > box.start_y);
         boxes_ahead.sort((a, b) => a.y >= b.y);
 
@@ -42,7 +46,6 @@ class Box {
         this.ticks = 0;
         this.y_limit = N_BOXES - 1;
         this.arrived = false;
-        /* this.id = Math.random().toString(16).slice(2); */
     }
 
     get y() {
@@ -59,16 +62,20 @@ class Box {
         return COLORS[parseInt(this.ticks % 0.5 * 10)];
     }
 
+    get node() {
+        return document.getElementById(`c${this.start_x}r${this.y}`)
+    }
+
+    get current_node_color() {
+        return this.node.style.background;
+    }
+
     reset() {
-        document
-            .getElementById(`c${this.start_x}r${this.y}`)
-            .style.background = null;
+        this.node.style.background = '';
     }
 
     fill() {
-        document
-            .getElementById(`c${this.start_x}r${this.y}`)
-            .style.background = this.color;
+        this.node.style.background = this.color;
     }
 
     move() {
