@@ -1,0 +1,38 @@
+:root {
+    box-sizing: border-box;
+}
+
+*,
+*::after,
+*::before {
+    box-sizing: inherit;
+}
+
+* {
+    margin: 0;
+}
+
+body {
+    width: 100dvw;
+    height: 100dvh;
+
+    padding: 1em;
+}
+
+nav {
+    width: 80%;
+    margin: 0px auto;
+
+    display: grid;
+    gap: 2em;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+
+    button {
+        height: 3em;
+        width: 100%;
+    }
+}
+
+header {
+    margin-bottom: 2em;
+}
